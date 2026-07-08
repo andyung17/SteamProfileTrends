@@ -1,4 +1,6 @@
 import asyncio
+import sys
+from turtle import title
 from howlongtobeatpy import HowLongToBeat
 import json
 
@@ -39,20 +41,29 @@ class GameDetailsObject:
         }
 
 async def get_game_data(title: str):
+
+    title = title.replace("-", "")
+
     results = await HowLongToBeat().async_search(title)
     
-    if results:
+    if results and len(results) > 0:
         best_match = max(results, key=lambda element: element.similarity)
-        
         game_details = GameDetailsObject.from_hltb_entry(best_match)
-
-        print(game_details.to_dict())  # For debugging purposes
-
+        print(json.dumps(game_details.to_dict()))
         return game_details
-
-        # print(f"Loaded: {game_details.game_name}")
-        
-        # print(json.dumps(game_details.to_dict()))
+    else:
+        fallback = {
+            "game_id": None,
+            "game_name": title,
+            "main_story": "N/A",
+            "completionist": "N/A",
+            "game_image_url": ""
+        }
+        print(json.dumps(fallback))
+        return None
 
 if __name__ == "__main__":
-    asyncio.run(get_game_data("Slime Rancher 2"))
+    if len(sys.argv) > 1:
+        target_game = sys.argv[1]
+
+    asyncio.run(get_game_data(target_game))

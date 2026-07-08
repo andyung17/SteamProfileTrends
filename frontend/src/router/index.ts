@@ -12,8 +12,14 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: "/game/:id/:name",
-      name: "GameInfo", // <--- This name must match what you put in router.push
+      path: "/",
+      name: "Reccommendations",
+      alias: "/recommendations",
+      component: HomeView,
+    },
+    {
+      path: "/game/:id/",
+      name: "GameInfo",
       component: GameInfo,
     },
   ],

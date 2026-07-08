@@ -7,10 +7,10 @@
     <div class="info-row">
       <img :src="profilePicture" alt="Steam Profile Picture" class="profile-pic" />
       <!-- <div>joined {{ joinDate }}</div> -->
-      <div class="level-badge">
-        <span class="level-label">LEVEL</span>
-        <span class="profile-level">{{ level }}</span>
-      </div>
+      <div class="steam-level-badge">
+        <span class="level-label">Level</span>
+        <span class="level-number">{{ level }}</span>
+    </div>
     </div>
   </div>
 </template>
@@ -83,25 +83,50 @@ onMounted(async () => {
   margin-left: 5%;
 }
 
-.level-badge {
+.steam-level-badge {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  border: 2px solid white;
-  padding: 10px 16px;
-  border-radius: 6px;
-  margin-top: 8px;
+  justify-content: center;
+  
+  min-width: 64px;
+  height: 64px;
+  padding: 4px;
+  
+  background: linear-gradient(135deg, rgba(20, 28, 47, 0.8) 0%, rgba(10, 14, 23, 0.9) 100%);
+  
+  border: 1px solid rgba(56, 189, 248, 0.25); 
+  border-radius: 8px;
+  
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+              inset 0 0 8px rgba(56, 189, 248, 0.05);
+              
+  transition: all 0.3s ease;
 }
 
+.steam-level-badge:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2),
+              inset 0 0 12px rgba(56, 189, 248, 0.1);
+  transform: translateY(-2px);
+}
+
+/* "LEVEL" Label Style */
 .level-label {
-  font-size: 0.9rem;
-  color: #888;
+  font-size: 9px;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: -2px;
 }
 
-.profile-level {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #f1c40f;
+.level-number {
+  font-size: 22px;
+  font-weight: 800;
+  
+  color: #eab308; 
+  text-shadow: 0 2px 4px rgba(234, 179, 8, 0.3);
+  font-family: 'Courier New', Courier, monospace;
 }
 </style>
