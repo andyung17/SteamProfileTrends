@@ -50,18 +50,6 @@
   }
 }
 
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-  background-image:
-    linear-gradient(rgba(15, 17, 23, 0.85), rgba(15, 17, 23, 0.85)),
-    url('/deep-sea-steam.gif');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
 h1,
 h2 {
   font-family: var(--heading);
@@ -169,7 +157,7 @@ code {
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
+  /* border-inline: 1px solid var(--border); */
   min-height: 100svh;
   display: flex;
   flex-direction: column;

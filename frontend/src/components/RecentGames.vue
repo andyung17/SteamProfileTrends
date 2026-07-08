@@ -4,16 +4,19 @@
     <div class="recent-games">
         <div v-for="game in games" :key="game.appid" class="game-row">
         <img :src="game.iconUrl" :alt="game.name" class="game-icon" />
-        <span class="game-name">{{ game.name }}</span>
+        <span class="game-name" @click="() => handleGameClick(game)">{{ game.name }}</span>
         <span class="game-hours">{{ game.hoursPlayed }} hr</span>
         </div>
     </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const props = defineProps<{
   steamId: string;
 }>();
@@ -26,6 +29,15 @@ interface RecentGame {
 }
 
 const games = ref<RecentGame[]>([]);
+
+const handleGameClick = (game: RecentGame) => {
+  console.log("Sending this game object:", game);
+  router.push({
+    name: "GameInfo", 
+    params: { name: game.name, id: game.appid }, 
+    state: { gameData: { ...game } }
+  });
+};
 
 onMounted(async () => {
   try {
@@ -86,6 +98,13 @@ onMounted(async () => {
   flex: 1;
   min-width: 180px;
   font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.game-name:hover {
+  color: #42b883;
+  text-decoration: underline;
 }
 
 .game-hours {

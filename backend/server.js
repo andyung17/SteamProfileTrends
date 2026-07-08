@@ -48,7 +48,7 @@ app.get("/api/recent-games/:steamid", async (req, res) => {
   try {
     const { data } = await axios.get(
       "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/",
-      { params: { key: process.env.STEAM_API_KEY, steamid, count: 5 } },
+      { params: { key: process.env.STEAM_API_KEY, steamid, count: 6 } },
     );
 
     const games = (data.response.games || []).map((game) => ({
