@@ -2,12 +2,50 @@ import "dotenv/config";
 import express from "express";
 import axios from "axios";
 import cors from "cors";
+import passport from "passport";
+import { Strategy as SteamStrategy } from "passport-steam";
 import { spawn } from "child_process";
 
+const STEAM_API_KEY = process.env.STEAM_API_KEY;
 const app = express();
 app.use(cors());
+app.use(passport.initialize());
 
-const STEAM_API_KEY = process.env.STEAM_API_KEY;
+passport.use(
+  new SteamStrategy(
+    {
+      returnURL: "http://localhost:3000/api/auth/steam/return",
+      realm: "http://localhost:3000/",
+      apiKey: process.env.STEAM_API_KEY,
+    },
+    (identifier, profile, done) => {
+      profile.steamid = identifier;
+      return done(null, profile);
+    },
+  ),
+);
+
+app.get(
+  "/api/auth/steam",
+  passport.authenticate("steam", { failureRedirect: "/" }),
+);
+
+app.get(
+  "/api/auth/steam/return",
+  passport.authenticate("steam", { session: false, failureRedirect: "/" }),
+  (req, res) => {
+    const steamId = req.user?.id;
+
+    // res.redirect(`http://localhost:5173/dashboard`);
+    if (!steamId) {
+      // Fallback fallback protection if something went wrong during extraction
+      return res.redirect("http://localhost:5173/?error=auth_failed");
+    }
+
+    // 2. Change this line to route dynamically using your new folder path structural parameters!
+    res.redirect(`http://localhost:5173/dashboard/user/${steamId}`);
+  },
+);
 
 app.get("/api/profile/:steamid", async (req, res) => {
   const { steamid } = req.params;
@@ -49,7 +87,7 @@ app.get("/api/recent-games/:steamid", async (req, res) => {
   try {
     const { data } = await axios.get(
       "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/",
-      { params: { key: process.env.STEAM_API_KEY, steamid, count: 6 } },
+      { params: { key: process.env.STEAM_API_KEY, steamid, count: 5 } },
     );
 
     const games = (data.response.games || []).map((game) => ({

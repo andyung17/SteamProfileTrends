@@ -5,9 +5,12 @@
         <img src="../assets/steam-search-logo.png" alt="Steam Lookup Logo" class="hotbar-logo" />
         <span class="hotbar-title">SteamTracker</span>
       </div>
+      <div class="hotbar-left" @click="goRecommendations">
+        <span class="nav-item">Recommender</span>
+      </div>
 
       <div class="hotbar-right">
-        <router-link to="/home" class="nav-item">Dashboard</router-link>
+        <router-link to="/dashboard/user" class="nav-item">Dashboard</router-link>
         </div>
     </div>
   </nav>
@@ -19,7 +22,10 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const goHome = () => {
-  router.push('/home');
+  router.push('/');
+};
+const goRecommendations = () => {
+  router.push('/recommendations');
 };
 </script>
 

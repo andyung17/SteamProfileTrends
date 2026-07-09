@@ -46,6 +46,9 @@
 
       </div>
     </div>
+    <button @click="handleNavigateToRecommender" class="recommender-nav-btn">
+      Open Recommender Engine
+    </button>
     
   </div>
 </template>
@@ -65,6 +68,51 @@ const props = defineProps<{
 
 const games = ref<GameInformation[]>([]);
 const isLoading = ref<boolean>(true);
+
+const gamesList = ref<any[]>([]);
+const genreHoursMap = ref<Record<string, number>>({});
+
+const handleNavigateToRecommender = () => {
+
+console.log("SENDING DATA:", genreHoursMap.value);
+
+  const payloadData = JSON.parse(JSON.stringify(genreHoursMap.value));
+  
+  console.log("CRITICAL CHECK - Pushing to state right now:", payloadData);
+
+  router.push({
+    name: "Recommender",
+    state: {
+      genreHoursData: payloadData // 💡 Pass the clean, un-proxied data object
+    }
+  });
+};
+
+const calculateGenrePlaytime = (gamesArray: any[]) => {
+const dictionary: Record<string, number> = {};
+  
+  console.log(`Processing playtime for ${gamesArray.length} games...`);
+
+  gamesArray.forEach(game => {
+    const genres = game.genres || [];
+    
+    /* 🌟 Flexibly fallback across your keys to guarantee 
+      it captures playtime regardless of the naming schema 
+    */
+    const hours = Number(game.recent_hoursPlayed ?? game.recentHoursPlayed ?? game.hoursplayed ?? 0);
+
+    genres.forEach((genre: string) => {
+      if (!dictionary[genre]) {
+        dictionary[genre] = 0;
+      }
+      dictionary[genre] = parseFloat((Number(dictionary[genre]) + hours).toFixed(1));
+    });
+  });
+
+  // Save the result map to your router state target variable
+  genreHoursMap.value = dictionary;
+  console.log("UPDATED SENDING DATA VALUE:", genreHoursMap.value);
+};
 
 const handleGameClick = (game: GameInformation) => {
   console.log("Game clicked successfully!", game);
@@ -104,6 +152,8 @@ onMounted(async () => {
       main_story: null,
       completionist: null
     }));
+
+    
 
     await Promise.all(
       games.value.map(async (game) => {
@@ -145,9 +195,12 @@ onMounted(async () => {
               }
               
             })
-      
     );
 
+    gamesList.value = [...games.value];
+
+    calculateGenrePlaytime(games.value);
+    
   } catch (err) {
     console.error('Failed to fetch recent games:', err);
   } finally {
@@ -315,5 +368,7 @@ onMounted(async () => {
     opacity: 0.9;
   }
 }
+
+
 
 </style>

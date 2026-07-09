@@ -1,17 +1,24 @@
 <template>
   <div class="dashboard-layout-wrapper">
     <div class="dashboard-content-container">
-      <Profile :steamId="STEAM_ID" />
-      <RecentGames :steamId="STEAM_ID" />
+      <Profile :steamId="steamId" />
+      <RecentGames :steamId="steamId" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import Profile from './Profile.vue';
 import RecentGames from './RecentGames.vue';
 
-const STEAM_ID = import.meta.env.VITE_STEAM_PERSONAL_ID;
+const route = useRoute();
+// const STEAM_ID = import.meta.env.VITE_STEAM_PERSONAL_ID;
+
+const steamId = computed(() => {
+  return route.params.steamId as string;
+});
 </script>
 
 <style scoped>

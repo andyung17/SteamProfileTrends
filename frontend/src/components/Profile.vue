@@ -20,7 +20,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 const props = defineProps<{
-  profilePicture: string | null | undefined;
+  profilePicture?: string | null | undefined;
   steamId: string;
 }>();
 

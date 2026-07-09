@@ -1,11 +1,18 @@
 <template>
+  
 <div 
   class="game-info-container" 
   :style="{ '--dynamic-bg-url': gameIcon ? `url(${gameIcon})` : 'none' }"
 >
+<div class="navigation-top-bar">
+    <span class="breadcrumb-back" @click="$router.back()">
+      <span class="arrow-sym">&larr;</span> Return to Dashboard
+    </span>
+  </div>
   <div class="game-content-wrapper">
     <div class="game-header-row">
       <div class="title-block">
+
         <h1 class="game-title">{{ gameName }}</h1>
         <a 
           :href="`https://store.steampowered.com/app/${appId}`" 
@@ -299,4 +306,37 @@ if (history.state?.gameData) {
               
   transition: all 0.25s ease-in-out;
 }
+
+.navigation-top-bar {
+  width: 100%;
+  max-width: none;   
+  margin: 0;            
+  display: flex;
+  justify-content: flex-start; 
+  padding: 0 40px;       
+  box-sizing: border-box;
+}
+
+.breadcrumb-back {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3) !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+.arrow-sym {
+  color: inherit;
+  font-size: 14px;
+}
+
+.breadcrumb-back:hover {
+  color: #38bdf8 !important;
+}
+
 </style>

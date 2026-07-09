@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import Navbar from './components/Navbar.vue';
+
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 </script>
 
 <style>
@@ -15,9 +19,9 @@ body {
 </style>
 <template>
   <div id="app-layout">
-    <Navbar />
+    <Navbar v-if="route.name !== 'NewHome'" />
     
-    <main class="main-viewport-content">
+      <main class="main-viewport-content">
       <router-view />
     </main>
   </div>
