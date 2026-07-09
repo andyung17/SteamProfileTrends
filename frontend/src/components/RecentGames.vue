@@ -83,7 +83,7 @@ console.log("SENDING DATA:", genreHoursMap.value);
   router.push({
     name: "Recommender",
     state: {
-      genreHoursData: payloadData // 💡 Pass the clean, un-proxied data object
+      genreHoursData: payloadData
     }
   });
 };
@@ -95,10 +95,7 @@ const dictionary: Record<string, number> = {};
 
   gamesArray.forEach(game => {
     const genres = game.genres || [];
-    
-    /* 🌟 Flexibly fallback across your keys to guarantee 
-      it captures playtime regardless of the naming schema 
-    */
+  
     const hours = Number(game.recent_hoursPlayed ?? game.recentHoursPlayed ?? game.hoursplayed ?? 0);
 
     genres.forEach((genre: string) => {
@@ -109,9 +106,7 @@ const dictionary: Record<string, number> = {};
     });
   });
 
-  // Save the result map to your router state target variable
   genreHoursMap.value = dictionary;
-  console.log("UPDATED SENDING DATA VALUE:", genreHoursMap.value);
 };
 
 const handleGameClick = (game: GameInformation) => {
@@ -158,7 +153,6 @@ onMounted(async () => {
     await Promise.all(
       games.value.map(async (game) => {
               
-              // Fetch HLTB Times safely
               try {
                 const hltbRes = await axios.get(`http://localhost:3000/api/game-details/${encodeURIComponent(game.name)}`);
                 game.main_story = hltbRes.data?.main_story ?? 'N/A';
@@ -169,7 +163,6 @@ onMounted(async () => {
                 game.completionist = 'N/A';
               }
 
-              // Fetch Achievements safely
               try {
                 const achRes = await axios.get(
                   `http://localhost:3000/api/game-achievements/${game.steam_appid}?steamId=${props.steamId}`
@@ -181,7 +174,6 @@ onMounted(async () => {
                 }
               } catch (achErr) {
                 console.error(`Achievements bypass for ${game.name}:`, achErr);
-                // Defaults are already set to 0 in the map above
               }
 
               try {
@@ -368,7 +360,4 @@ onMounted(async () => {
     opacity: 0.9;
   }
 }
-
-
-
 </style>
