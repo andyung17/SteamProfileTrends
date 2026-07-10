@@ -16,7 +16,7 @@
         @click="handleGameClick(game)"
       >
         <div class="game-meta-group">
-          <img :src="game.iconUrl" :alt="game.name" class="game-row-icon" />
+          <img :src="game.icon_url" :alt="game.name" class="game-row-icon" />
           <span class="game-row-name">{{ game.name }}</span>
         </div>
 
@@ -58,7 +58,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import type { GameInformation } from '../types/game';
+import type { GameInformation } from '../types/game_information';
 import { toRaw } from 'vue';
 
 const router = useRouter();
@@ -120,7 +120,7 @@ const handleGameClick = (game: GameInformation) => {
       main_story: game.main_story ?? 'N/A',
       completionist: game.completionist ?? 'N/A',
       achievements: game.achievements ? toRaw(game.achievements) : { unlocked: 0, total: 0, percentage: 0 },
-      iconUrl: game.iconUrl,
+      icon_url: game.icon_url,
       genres: game.genres ? toRaw(game.genres) : []
   };
 
@@ -143,7 +143,7 @@ onMounted(async () => {
       name: game.name,
       recent_hoursPlayed: game.recent_hoursPlayed !== undefined ? game.recent_hoursPlayed : game.hoursplayed,
       total_hoursPlayed: game.total_hoursPlayed !== undefined ? game.total_hoursPlayed : game.hoursplayed,
-      iconUrl: game.iconUrl || game.iconurl,
+      icon_url: game.icon_url || game.icon_url,
       main_story: null,
       completionist: null
     }));

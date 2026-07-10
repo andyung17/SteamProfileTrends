@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UserProfile {
+  id          String   @id // Steam 64-bit ID
+  displayName String   @map("display_name")
+  avatarUrl   String?  @map("avatar_url")
+  level       Int
+  joinDate    DateTime @map("join_date")
+  sessions    Session[]
+
+  @@map("user_profiles")
+}
+
+model GameInformation {
+    id                 String    @id @default(uuid())
+    userId             String    @map("user_id")
+    steamAppid         Int       @map("steam_appid")
+    name               String
+    recentHoursPlayed  Float     @map("recent_hours_played") // Maps recent_hoursPlayed
+    totalHoursPlayed   Float     @map("total_hours_played")  // Maps total_hoursPlayed
+    iconUrl            String    @map("icon_url")
+    achievements       Json      // Stores { unlocked, total, percentage }
+    genres             Json      // Stores string[] array as JSONB
+
+    // Optional fields
+    mainStory          Json?     @map("main_story")         // Json allows number, string, or null
+    completionist      Json?
+
+    // Relations
+    sessions           Session[]
+
+    @@map("game_information")
+}
+
+model Session {
+  id            String          @id @default(uuid())
+  userId        String          @map("user_id")
+  gameId        Int             @map("game_id")
+  startAt       DateTime        @default(now()) @map("start_at")
+  endAt         DateTime?       @map("end_at")
+  totalDuration Int?            @map("total_duration")
+
+  // Relations
+  user          UserProfile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game          GameInformation @relation(fields: [gameId], references: [steamAppid], onDelete: Cascade)
+  playtimeChecks PlaytimeCheck[]
+
+  @@map("sessions")
+}
+
+model PlaytimeCheck {
+  id                 String   @id @default(uuid())
+  sessionId          String?  @map("session_id")
+  gameId             Int      @map("game_id")
+  checkedAt          DateTime @default(now()) @map("checked_at")
+  cumulativePlaytime Int      @map("cumulative_playtime")
+
+  session            Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@map("playtime_checks")
+}
