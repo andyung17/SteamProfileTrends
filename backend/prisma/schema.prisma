@@ -8,61 +8,78 @@ generator client {
 }
 
 model UserProfile {
-  id          String   @id // Steam 64-bit ID
-  displayName String   @map("display_name")
-  avatarUrl   String?  @map("avatar_url")
-  level       Int
-  joinDate    DateTime @map("join_date")
-  sessions    Session[]
+  id                String            @id // Steam 64-bit ID
+  displayName       String            @map("display_name")
+  avatarUrl         String?           @map("avatar_url")
+  level             Int
+  joinDate          DateTime          @map("join_date")
+  communityVisibility Int             @map("community_visibility") // From your UML {1, 3}
+
+  // Relations
+  gameInformation   GameInformation[]
+  sessions          Session[]
 
   @@map("user_profiles")
 }
 
+model Game {
+  steamAppid     Int               @id @map("steam_appid") // PK from your diagram
+  name           String
+  genres         Json              // Stores string[]
+  mainStory      Json?             @map("main_story")
+  completionist  Json?             @map("completionist")
+  iconUrl        String            @map("icon_url")
+  logoUrl        String            @map("logo_url")
+
+  // Relations
+  gameInstances  GameInformation[]
+  playtimeChecks PlaytimeCheck[]
+
+  @@map("games")
+}
+
 model GameInformation {
-    id                 String    @id @default(uuid())
-    userId             String    @map("user_id")
-    steamAppid         Int       @map("steam_appid")
-    name               String
-    recentHoursPlayed  Float     @map("recent_hours_played") // Maps recent_hoursPlayed
-    totalHoursPlayed   Float     @map("total_hours_played")  // Maps total_hoursPlayed
-    iconUrl            String    @map("icon_url")
-    achievements       Json      // Stores { unlocked, total, percentage }
-    genres             Json      // Stores string[] array as JSONB
+  id                 String      @id @default(uuid())
+  userId             String      @map("user_id")
+  steamAppid         Int         @map("steam_appid")
+  recentHoursPlayed  Float       @map("recent_hours_played")
+  totalHoursPlayed   Float       @map("total_hours_played")
+  achievements       Json        // Stores { unlocked, total, percentage }
 
-    // Optional fields
-    mainStory          Json?     @map("main_story")         // Json allows number, string, or null
-    completionist      Json?
+  // Relations
+  user               UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameCatalog        Game        @relation(fields: [steamAppid], references: [steamAppid], onDelete: Cascade)
+  sessions           Session[]
 
-    // Relations
-    sessions           Session[]
-
-    @@map("game_information")
+  @@map("game_information")
 }
 
 model Session {
   id            String          @id @default(uuid())
   userId        String          @map("user_id")
-  gameId        Int             @map("game_id")
+  gameId        String          @map("game_id") // Changed to String to match GameInformation.id
   startAt       DateTime        @default(now()) @map("start_at")
   endAt         DateTime?       @map("end_at")
   totalDuration Int?            @map("total_duration")
 
   // Relations
-  user          UserProfile     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  game          GameInformation @relation(fields: [gameId], references: [steamAppid], onDelete: Cascade)
+  user           UserProfile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameInstance   GameInformation @relation(fields: [gameId], references: [id], onDelete: Cascade)
   playtimeChecks PlaytimeCheck[]
 
   @@map("sessions")
 }
 
 model PlaytimeCheck {
-  id                 String   @id @default(uuid())
-  sessionId          String?  @map("session_id")
-  gameId             Int      @map("game_id")
-  checkedAt          DateTime @default(now()) @map("checked_at")
-  cumulativePlaytime Int      @map("cumulative_playtime")
+  id                 String    @id @default(uuid())
+  sessionId          String?   @map("session_id")
+  gameId             Int       @map("game_id") // Kept as Int because your diagram maps it back to Game.steam_appid
+  checkedAt          DateTime  @default(now()) @map("checked_at")
+  cumulativePlaytime Int       @map("cumulative_playtime")
 
-  session            Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  // Relations
+  session            Session?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  gameCatalog        Game      @relation(fields: [gameId], references: [steamAppid], onDelete: Cascade)
 
   @@map("playtime_checks")
 }
