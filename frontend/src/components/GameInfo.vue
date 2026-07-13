@@ -109,7 +109,7 @@ if (history.state?.gameData) {
     game_completionist.value = game.completionist;
     game_achievement_percentage.value = game.achievements?.percentage ?? 0;
     game_genres.value = game.genres || [];  
-    gameIcon.value = game.iconUrl.replace('header.jpg', 'library_hero.jpg');
+    gameIcon.value = game.icon_url?.replace('header.jpg', 'library_hero.jpg');
     
   } else {
     appId.value = route.params.id as string;

@@ -143,7 +143,7 @@ onMounted(async () => {
       name: game.name,
       recent_hoursPlayed: game.recent_hoursPlayed !== undefined ? game.recent_hoursPlayed : game.hoursplayed,
       total_hoursPlayed: game.total_hoursPlayed !== undefined ? game.total_hoursPlayed : game.hoursplayed,
-      icon_url: game.icon_url || game.icon_url,
+      icon_url: game.icon_url,
       main_story: null,
       completionist: null
     }));

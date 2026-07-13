@@ -1,10 +1,13 @@
 {
   "devDependencies": {
-    "concurrently": "^10.0.3"
+    "concurrently": "^10.0.3",
+    "tsx": "^4.23.1"
   },
   "scripts": {
-    "start-backend": "cd backend && node server.js",
+    "start-backend": "cd backend && tsx server.js",
     "start-frontend": "cd frontend && npm run dev",
-    "dev": "concurrently \"npm run start-backend\" \"npm run start-frontend\""
+    "dev": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
+    "database_reset": "cd backend && npx prisma migrate reset --force --schema=prisma/schema.prisma",
+    "database_init": "cd backend && npx prisma migrate dev --schema=prisma/schema.prisma --name sync_steam_analytics_schema --create-only && npx prisma db push"
   }
 }

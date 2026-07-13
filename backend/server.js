@@ -5,11 +5,13 @@ import cors from "cors";
 import passport from "passport";
 import { Strategy as SteamStrategy } from "passport-steam";
 import { spawn } from "child_process";
+import userRouter from "./src/routes/userRoutes.js";
 
 const STEAM_API_KEY = process.env.STEAM_API_KEY;
 const app = express();
 app.use(cors());
 app.use(passport.initialize());
+app.use("/api/users", userRouter);
 
 passport.use(
   new SteamStrategy(
@@ -95,7 +97,7 @@ app.get("/api/recent-games/:steamid", async (req, res) => {
       name: game.name,
       recent_hoursPlayed: Math.round((game.playtime_2weeks / 60) * 10) / 10,
       total_hoursPlayed: Math.round((game.playtime_forever / 60) * 10) / 10,
-      iconUrl: `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`,
+      icon_url: `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`,
     }));
 
     res.json({ games });
