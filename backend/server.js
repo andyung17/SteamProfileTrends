@@ -4,10 +4,12 @@ import axios from "axios";
 import cors from "cors";
 import passport from "passport";
 import { Strategy as SteamStrategy } from "passport-steam";
+import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 import userRouter from "./src/routes/userRoutes.js";
 
 const STEAM_API_KEY = process.env.STEAM_API_KEY;
+const prisma = new PrismaClient();
 const app = express();
 app.use(cors());
 app.use(passport.initialize());
@@ -35,17 +37,52 @@ app.get(
 app.get(
   "/api/auth/steam/return",
   passport.authenticate("steam", { session: false, failureRedirect: "/" }),
-  (req, res) => {
-    const steamId = req.user?.id;
+  async (req, res) => {
+    try {
+      const steamId = req.user?.id;
 
-    // res.redirect(`http://localhost:5173/dashboard`);
-    if (!steamId) {
-      // Fallback fallback protection if something went wrong during extraction
-      return res.redirect("http://localhost:5173/?error=auth_failed");
+      if (!steamId) {
+        return res.redirect("http://localhost:5173/?error=auth_failed");
+      }
+
+      const displayName = req.user?.displayName || "Steam Player";
+      const avatarUrl =
+        req.user?.photos?.[2]?.value || "https://default-avatar...";
+
+      const levelResponse = await axios.get(
+        "https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/",
+        {
+          params: { key: STEAM_API_KEY, steamid: steamId },
+        },
+      );
+
+      await prisma.userProfile.upsert({
+        where: { id: steamId },
+        update: {
+          displayName: displayName,
+          avatarUrl: avatarUrl,
+          level: levelResponse.data.response.player_level || 1,
+        },
+        create: {
+          id: steamId,
+          displayName: displayName,
+          avatarUrl: avatarUrl,
+          communityVisibility: 3,
+          joinDate: new Date(),
+          level: levelResponse.data.response.player_level || 1,
+        },
+      });
+
+      console.log(`[Auth] Successfully synced Steam User ${steamId} to DB!`);
+
+      res.redirect(`http://localhost:5173/homepage/user/${steamId}`);
+    } catch (dbError) {
+      console.error(
+        "[Auth] Failed to write authenticated user to database:",
+        dbError,
+      );
+      res.redirect("http://localhost:5173/?error=database_sync_failed");
     }
-
-    // 2. Change this line to route dynamically using your new folder path structural parameters!
-    res.redirect(`http://localhost:5173/dashboard/user/${steamId}`);
   },
 );
 

@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 import NewHome from "../components/NewHome.vue";
-import HomeView from "../components/HomeView.vue";
+import Homepage from "../components/Homepage.vue";
+import Dashboard from "../components/Dashboard.vue";
 import GameInfo from "../components/GameInfo.vue";
 import Recommender from "../components/Recommender.vue";
 
@@ -17,7 +18,12 @@ const router = createRouter({
       path: "/dashboard/user/:steamId",
       name: "Dashboard",
       alias: "/dashboard",
-      component: HomeView,
+      component: Dashboard,
+    },
+    {
+      path: "/homepage/user/:steamId",
+      name: "Homepage",
+      component: Homepage,
     },
     {
       path: "/Recommender",

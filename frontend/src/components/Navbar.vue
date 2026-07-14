@@ -10,7 +10,11 @@
       </div>
 
       <div class="hotbar-right">
-        <router-link to="/dashboard/user" class="nav-item">Dashboard</router-link>
+        <router-link :to="'/dashboard/user/' + $route.params.steamId" class="nav-item">Dashboard</router-link>
+      </div>
+
+      <div class="hotbar-right">
+        <router-link to="/" class="nav-item">Sign Out</router-link>
         </div>
     </div>
   </nav>
@@ -21,11 +25,12 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+
 const goHome = () => {
-  router.push('/');
+  router.push('/homepage/user/' + router.currentRoute.value.params.steamId);
 };
 const goRecommendations = () => {
-  router.push('/recommendations');
+  router.push('/recommendations/' + router.currentRoute.value.params.steamId);
 };
 </script>
 
