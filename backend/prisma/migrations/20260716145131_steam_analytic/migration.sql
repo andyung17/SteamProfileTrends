@@ -53,7 +53,7 @@ CREATE TABLE "playtime_checks" (
     "session_id" TEXT,
     "game_id" INTEGER NOT NULL,
     "checked_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "cumulative_playtime" INTEGER NOT NULL,
+    "cumulative_playtime" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "playtime_checks_pkey" PRIMARY KEY ("id")
 );

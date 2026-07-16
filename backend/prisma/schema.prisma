@@ -76,7 +76,7 @@ model PlaytimeCheck {
   sessionId          String?   @map("session_id")
   gameId             Int       @map("game_id") // Kept as Int because your diagram maps it back to Game.steam_appid
   checkedAt          DateTime  @default(now()) @map("checked_at")
-  cumulativePlaytime Int       @map("cumulative_playtime")
+  cumulativePlaytime Float       @map("cumulative_playtime")
 
   // Relations
   session            Session?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
