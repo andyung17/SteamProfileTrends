@@ -52,6 +52,11 @@ model GameInformation {
   gameCatalog        Game        @relation(fields: [steamAppid], references: [steamAppid], onDelete: Cascade)
   sessions           Session[]
 
+  //  INDEXES
+  @@index([userId])
+  @@index([steamAppid])
+  @@unique([userId, steamAppid])
+
   @@map("game_information")
 }
 
@@ -68,6 +73,11 @@ model Session {
   gameInstance   GameInformation @relation(fields: [gameId], references: [id], onDelete: Cascade)
   playtimeChecks PlaytimeCheck[]
 
+  //  INDEXES
+  @@index([userId])
+  @@index([gameId])
+  @@index([startAt])
+
   @@map("sessions")
 }
 
@@ -81,6 +91,11 @@ model PlaytimeCheck {
   // Relations
   session            Session?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
   gameCatalog        Game      @relation(fields: [gameId], references: [steamAppid], onDelete: Cascade)
+
+  //  INDEXES
+  @@index([sessionId])
+  @@index([gameId])
+  @@index([checkedAt])
 
   @@map("playtime_checks")
 }

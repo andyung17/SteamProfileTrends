@@ -9,6 +9,7 @@ import { spawn } from "child_process";
 
 import userRouter from "./src/routes/userRoutes.ts";
 import sessionRouter from "./src/routes/sessionRoutes.ts";
+import gameInfoRouter from "./src/routes/gameInformation.ts";
 
 import { initPlaytimeCron } from "./src/services/cronService.ts";
 import { fetchSteamStoreDetails } from "./src/utils/steam.ts";
@@ -22,6 +23,7 @@ app.use(passport.initialize());
 
 app.use("/api/users", userRouter);
 app.use("/api", sessionRouter);
+app.use("/api", gameInfoRouter);
 
 passport.use(
   new SteamStrategy(
