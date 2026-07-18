@@ -2,6 +2,7 @@
   <div class="dashboard-layout-wrapper">
     <div class="dashboard-content-container">
       <Profile :steamId="steamId" />
+      <SessionView :steamId="steamId"/>
     </div>
   </div>
 </template>
@@ -10,6 +11,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Profile from './Profile.vue';
+import SessionView from './SessionView.vue';
 
 const route = useRoute();
 

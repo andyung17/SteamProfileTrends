@@ -31,13 +31,16 @@ const level = ref<number | null>(null);
 onMounted(async () => {
   try {
     const { data } = await axios.get(
-      `http://localhost:3000/api/profile/${props.steamId}`,
+      `http://localhost:3000/api/users/${props.steamId}`,
     );
-    profilePicture.value = data.avatarFull;
-    playerName.value = data.playerName;
-    level.value = data.level;
+
+    const user = data.steamUser;    
+
+    profilePicture.value = user.avatarUrl;
+    playerName.value = user.displayName;
+    level.value = user.level;
   } catch (err) {
-    console.error("Failed to fetch profile data:", err);
+    console.error("Failed to fetch profile user:", err);
   }
 });
 </script>

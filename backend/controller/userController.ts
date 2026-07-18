@@ -40,6 +40,39 @@ export const syncUserProfile = async (req: Request, res: Response) => {
   }
 };
 
+// getUserDetails
+export const getUserProfile = async (req: Request, res: Response) => {
+  try {
+    const steamId = req.params.steamId as string;
+
+    if (!steamId) {
+      return res
+        .status(400)
+        .json({ error: "Steam ID is required to find a profile." });
+    }
+
+    const steamUser = await prisma.userProfile.findUnique({
+      where: { id: steamId },
+    });
+
+    if (!steamUser) {
+      return res
+        .status(404)
+        .json({ success: false, error: "User profile not found." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      steamUser,
+    });
+  } catch (error: any) {
+    console.error("User retrieval error:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 // deleting a user
 export const deleteUserProfile = async (req: Request, res: Response) => {
   try {

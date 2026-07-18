@@ -8,6 +8,8 @@ import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 
 import userRouter from "./src/routes/userRoutes.ts";
+import sessionRouter from "./src/routes/sessionRoutes.ts";
+
 import { initPlaytimeCron } from "./src/services/cronService.ts";
 import { fetchSteamStoreDetails } from "./src/utils/steam.ts";
 import { fetchGamePlaytimes } from "./src/utils/steam.ts";
@@ -17,7 +19,9 @@ const prisma = new PrismaClient();
 const app = express();
 app.use(cors());
 app.use(passport.initialize());
+
 app.use("/api/users", userRouter);
+app.use("/api", sessionRouter);
 
 passport.use(
   new SteamStrategy(
