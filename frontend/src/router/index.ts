@@ -4,7 +4,8 @@ import NewHome from "../components/NewHome.vue";
 import Homepage from "../components/Homepage.vue";
 import Dashboard from "../components/Dashboard.vue";
 import GameInfo from "../components/GameInfo.vue";
-import Recommender from "../components/Recommender.vue";
+import Recommendation from "../components/Recommendation.vue";
+import EntireGamesList from "../components/EntireGamesList.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,14 +27,19 @@ const router = createRouter({
       component: Homepage,
     },
     {
-      path: "/Recommender",
-      name: "Recommender",
-      component: Recommender,
+      path: "/recommendations/:steamId",
+      name: "Recommendation",
+      component: Recommendation,
     },
     {
-      path: "/game/:id/",
+      path: "/user/:userId/game/:id",
       name: "GameInfo",
       component: GameInfo,
+    },
+    {
+      path: "/user/:userId/played",
+      name: "EntireGamesList",
+      component: EntireGamesList,
     },
   ],
 });
