@@ -6,7 +6,7 @@
         <span class="hotbar-title">SteamTracker</span>
       </div>
       <div class="hotbar-left" @click="goRecommendations">
-        <span class="nav-item">Recommender</span>
+        <span class="nav-item">Recommendation</span>
       </div>
 
       <div class="hotbar-right">
@@ -27,7 +27,8 @@ const router = useRouter();
 
 
 const goHome = () => {
-  router.push('/homepage/user/' + router.currentRoute.value.params.steamId);
+
+router.push('/homepage/user/' + (router.currentRoute.value.params.steamId || router.currentRoute.value.params.userId));
 };
 const goRecommendations = () => {
   router.push('/recommendations/' + router.currentRoute.value.params.steamId);

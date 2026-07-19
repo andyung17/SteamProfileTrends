@@ -4,17 +4,29 @@
       Welcome<br />
       <span class="player-name">{{ playerName }}</span>
     </h1>
+    
     <div class="info-row">
-      <img :src="profilePicture" alt="Steam Profile Picture" class="profile-pic" />
-      <!-- <div>joined {{ joinDate }}</div> -->
-      <div class="steam-level-badge">
-        <span class="level-label">Level</span>
-        <span class="level-number">{{ level }}</span>
-    </div>
+      <div class="player-identity-group">
+        <img :src="profilePicture" alt="Steam Profile Picture" class="profile-pic" />
+        
+        <div class="meta-badges-cluster">
+          <!-- Steam Level Ring -->
+          
+          <div class="steam-level-badge">
+            <span class="level-label">Level</span>
+            <span class="level-number">{{ level }}</span>
+          </div>
+          <div class="joined-date-card" v-if="joinedDate">
+            <span class="card-label">Member Since</span>
+            <span class="card-value">
+              {{ new Date(joinedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import axios from "axios";
@@ -27,6 +39,7 @@ const props = defineProps<{
 const profilePicture = ref<string | undefined>(undefined);
 const playerName = ref<string>('');
 const level = ref<number | null>(null);
+const joinedDate = ref<Date | null>(null);
 
 onMounted(async () => {
   try {
@@ -39,6 +52,7 @@ onMounted(async () => {
     profilePicture.value = user.avatarUrl;
     playerName.value = user.displayName;
     level.value = user.level;
+    joinedDate.value = user.joinDate;
   } catch (err) {
     console.error("Failed to fetch profile user:", err);
   }
@@ -68,12 +82,28 @@ onMounted(async () => {
   display: block;
 }
 
+.player-identity-group {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 24px;            
+}
+
+.profile-pic {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 3px solid #42b883;
+}
+
 .info-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center; 
   width: 100%;
-  padding: 0 30px;
+  max-width: 1200px;
+  margin: 0 auto;     
+  padding: 0 40px;    
   box-sizing: border-box;
 }
 
@@ -92,44 +122,82 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   
-  min-width: 64px;
-  height: 64px;
-  padding: 4px;
+  width: 58px;
+  height: 58px;
   
-  background: linear-gradient(135deg, rgba(20, 28, 47, 0.8) 0%, rgba(10, 14, 23, 0.9) 100%);
+  background: #101822;
+  border: 3px solid #eab308;
+  border-radius: 50%;
   
-  border: 1px solid rgba(56, 189, 248, 0.25); 
-  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.25),
+              inset 0 0 8px rgba(0, 0, 0, 0.8);
   
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
-              inset 0 0 8px rgba(56, 189, 248, 0.05);
-              
-  transition: all 0.3s ease;
+  padding: 0; 
+  margin: 0;
+  
+  transition: transform 0.2s ease;
 }
 
-.steam-level-badge:hover {
-  border-color: rgba(56, 189, 248, 0.6);
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2),
-              inset 0 0 12px rgba(56, 189, 248, 0.1);
-  transform: translateY(-2px);
-}
-
-/* "LEVEL" Label Style */
 .level-label {
-  font-size: 9px;
+  font-size: 8px;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 1px;
-  font-weight: 600;
-  margin-bottom: -2px;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin: 0 0 -1px 0;
+  line-height: 1;
+}
+.level-number {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff; 
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.1;
+  margin: 0;
 }
 
-.level-number {
-  font-size: 22px;
-  font-weight: 800;
-  
-  color: #eab308; 
-  text-shadow: 0 2px 4px rgba(234, 179, 8, 0.3);
-  font-family: 'Courier New', Courier, monospace;
+.meta-badges-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  height: 200px;
+  box-sizing: border-box;
 }
+
+.joined-date-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  
+  width: 130px;
+  height: 54px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+.card-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.75px;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.card-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1;
+}
+
 </style>

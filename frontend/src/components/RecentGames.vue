@@ -46,8 +46,8 @@
 
       </div>
     </div>
-    <button @click="handleNavigateToRecommender" class="recommender-nav-btn">
-      Open Recommender Engine
+    <button @click="handleNavigateToRecommendation" class="Recommendation-nav-btn">
+      Open Recommendation Engine
     </button>
     
   </div>
@@ -72,7 +72,7 @@ const isLoading = ref<boolean>(true);
 const gamesList = ref<any[]>([]);
 const genreHoursMap = ref<Record<string, number>>({});
 
-const handleNavigateToRecommender = () => {
+const handleNavigateToRecommendation = () => {
 
 console.log("SENDING DATA:", genreHoursMap.value);
 
@@ -81,7 +81,7 @@ console.log("SENDING DATA:", genreHoursMap.value);
   console.log("CRITICAL CHECK - Pushing to state right now:", payloadData);
 
   router.push({
-    name: "Recommender",
+    name: "Recommendation",
     state: {
       genreHoursData: payloadData
     }

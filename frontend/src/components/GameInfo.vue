@@ -61,7 +61,7 @@
             <div class="stat-badge achievements-pill">
               <span class="label">Achievements</span>
               <span class="value">
-                  {{ game_achievement_gained }}/{{ game_achievement_total }}
+                {{ game_achievement_total === 0 ? 'N/A' : `${game_achievement_gained}/${game_achievement_total}` }}
               </span>
             </div>
           </div>
