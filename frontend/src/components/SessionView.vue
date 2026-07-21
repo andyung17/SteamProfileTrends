@@ -9,7 +9,7 @@
     </div>
 
     <div v-else-if="completedSessions.length === 0" class="no-history-msg">
-      No completed session history found.
+      Play something to add into your history.
     </div>
 
     <div v-else class="games-list-box">
@@ -51,7 +51,9 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const props = defineProps<{
   steamId: string;
+  gameId?: string;
 }>();
+
 
 const sessions = ref<any[]>([]);
 const isLoading = ref<boolean>(true);
@@ -72,17 +74,45 @@ const formatDate = (dateString: string) => {
 };
 
 const handleSessionClick = (session: any) => {
+  const appId = session.gameInstance?.gameCatalog?.steamAppid || session.gameId;
+  const currentUserId = session.userId || props.steamId; 
+
   router.push({
     name: "GameInfo", 
-    params: { id: session.gameInstance?.gameCatalog?.steamAppid || session.gameId },
-    state: { sessionData: session }
+    params: { 
+      userId: currentUserId, 
+      id: appId 
+    },
+    state: { 
+      sessionData: session,
+      userId: currentUserId,
+      steamAppid: appId
+    }
   });
 };
 
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const { data } = await axios.get(`http://localhost:3000/api/user/sessionhistory/${props.steamId}`);
+    const userId = props.steamId || router.currentRoute.value.params.steamId || router.currentRoute.value.params.userId;
+    const gameId = props.gameId;
+
+    if (!userId) {
+      console.error('Cannot fetch session history: User ID missing.');
+      return;
+    }
+
+    let url = `http://localhost:3000/api/user/sessionhistory/${userId}`;
+
+    // console.log("GAMEID " + gameId)
+
+    if (gameId) {
+      url = `http://localhost:3000/api/user/${userId}/singlesessionhistory/${gameId}`;
+    }
+
+    console.log(url)
+
+    const { data } = await axios.get(url);
     if (data.success) {
       sessions.value = data.history;
     }

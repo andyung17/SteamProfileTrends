@@ -8,6 +8,9 @@
       <div class="hotbar-left" @click="goRecommendations">
         <span class="nav-item">Recommendation</span>
       </div>
+      <div class="hotbar-center">
+        <input/>
+      </div>
 
       <div class="hotbar-right">
         <router-link :to="'/dashboard/user/' + $route.params.steamId" class="nav-item">Dashboard</router-link>
