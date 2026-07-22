@@ -64,6 +64,13 @@ async def get_game_data(title: str):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        target_game = sys.argv[1]
+        unpruned_game = sys.argv[1]
+
+        cleaned = unpruned_game.replace("™", "")
+        cleaned = cleaned.replace("(TM)", "").replace("(tm)", "")
+        
+        cleaned = cleaned.replace("-", ":")
+        
+        target_game = " ".join(cleaned.split())
 
     asyncio.run(get_game_data(target_game))

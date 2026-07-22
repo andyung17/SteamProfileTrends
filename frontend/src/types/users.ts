@@ -1,9 +1,9 @@
 interface UserProfile {
   id: string;
   display_name: string;
-  avatarUrl: string;
+  avatar_url: string;
   level: number;
-  joinDate: string;
+  join_date: Date;
 }
 
 export type { UserProfile };

@@ -1,9 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 import NewHome from "../components/NewHome.vue";
-import HomeView from "../components/HomeView.vue";
+import Homepage from "../components/Homepage.vue";
+import Dashboard from "../components/Dashboard.vue";
 import GameInfo from "../components/GameInfo.vue";
-import Recommender from "../components/Recommender.vue";
+import Recommendation from "../components/Recommendation.vue";
+import EntireGamesList from "../components/EntireGamesList.vue";
+import Charts from "../components/Charts.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,17 +20,33 @@ const router = createRouter({
       path: "/dashboard/user/:steamId",
       name: "Dashboard",
       alias: "/dashboard",
-      component: HomeView,
+      component: Dashboard,
     },
     {
-      path: "/Recommender",
-      name: "Recommender",
-      component: Recommender,
+      path: "/charts/user/:steamId",
+      name: "Charts",
+      alias: "/charts",
+      component: Charts,
     },
     {
-      path: "/game/:id/",
+      path: "/homepage/user/:steamId",
+      name: "Homepage",
+      component: Homepage,
+    },
+    {
+      path: "/recommendations/:steamId",
+      name: "Recommendation",
+      component: Recommendation,
+    },
+    {
+      path: "/user/:userId/game/:id",
       name: "GameInfo",
       component: GameInfo,
+    },
+    {
+      path: "/user/:userId/played",
+      name: "EntireGamesList",
+      component: EntireGamesList,
     },
   ],
 });

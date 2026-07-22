@@ -4,12 +4,30 @@ import axios from "axios";
 import cors from "cors";
 import passport from "passport";
 import { Strategy as SteamStrategy } from "passport-steam";
+import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 
+import userRouter from "./src/routes/userRoutes.ts";
+import sessionRouter from "./src/routes/sessionRoutes.ts";
+import gameInfoRouter from "./src/routes/gameInformation.ts";
+import gameRouter from "./src/routes/gameRoutes.ts";
+import playTimeRouter from "./src/routes/playTimeCheck.ts";
+
+import { initPlaytimeCron } from "./src/services/cronService.ts";
+import { fetchSteamStoreDetails } from "./src/utils/steam.ts";
+import { fetchGamePlaytimes } from "./src/utils/steam.ts";
+
 const STEAM_API_KEY = process.env.STEAM_API_KEY;
+const prisma = new PrismaClient();
 const app = express();
 app.use(cors());
 app.use(passport.initialize());
+
+app.use("/api/users", userRouter);
+app.use("/api", sessionRouter);
+app.use("/api", gameInfoRouter);
+app.use("/api", gameRouter);
+app.use("/api", playTimeRouter);
 
 passport.use(
   new SteamStrategy(
@@ -33,19 +51,121 @@ app.get(
 app.get(
   "/api/auth/steam/return",
   passport.authenticate("steam", { session: false, failureRedirect: "/" }),
-  (req, res) => {
-    const steamId = req.user?.id;
+  async (req, res) => {
+    try {
+      const steamId = req.user?.id;
 
-    // res.redirect(`http://localhost:5173/dashboard`);
-    if (!steamId) {
-      // Fallback fallback protection if something went wrong during extraction
-      return res.redirect("http://localhost:5173/?error=auth_failed");
+      if (!steamId) {
+        return res.redirect("http://localhost:5173/?error=auth_failed");
+      }
+
+      const displayName = req.user?.displayName || "Steam Player";
+      const avatarUrl =
+        req.user?.photos?.[2]?.value || "https://default-avatar...";
+
+      const levelResponse = await axios.get(
+        "https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/",
+        {
+          params: { key: STEAM_API_KEY, steamid: steamId },
+        },
+      );
+
+      await prisma.userProfile.upsert({
+        where: { id: steamId },
+        update: {
+          displayName: displayName,
+          avatarUrl: avatarUrl,
+          level: levelResponse.data.response.player_level || 1,
+        },
+        create: {
+          id: steamId,
+          displayName: displayName,
+          avatarUrl: avatarUrl,
+          communityVisibility: 3,
+          joinDate: new Date(),
+          level: levelResponse.data.response.player_level || 1,
+        },
+      });
+
+      console.log(`[Auth] Successfully synced Steam User ${steamId} to DB!`);
+
+      res.redirect(`http://localhost:5173/homepage/user/${steamId}`);
+    } catch (dbError) {
+      console.error(
+        "[Auth] Failed to write authenticated user to database:",
+        dbError,
+      );
+      res.redirect("http://localhost:5173/?error=database_sync_failed");
     }
-
-    // 2. Change this line to route dynamically using your new folder path structural parameters!
-    res.redirect(`http://localhost:5173/dashboard/user/${steamId}`);
   },
 );
+
+app.post("/api/users/add/:steamId", async (req, res) => {
+  const { steamId } = req.params;
+
+  try {
+    const profileResponse = await axios.get(
+      "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/",
+      {
+        params: {
+          key: STEAM_API_KEY,
+          steamids: steamId,
+        },
+      },
+    );
+
+    const playerData = profileResponse.data?.response?.players?.[0];
+
+    if (!playerData) {
+      return res.status(404).json({ error: "Steam user not found." });
+    }
+
+    const displayName = playerData.personaname || "Steam Player";
+    const avatarUrl = playerData.avatarfull || "https://default-avatar...";
+    const communityVisibility = playerData.communityvisibilitystate || 3;
+
+    let steamLevel = 1;
+    try {
+      const levelResponse = await axios.get(
+        "https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/",
+        {
+          params: { key: STEAM_API_KEY, steamid: steamId },
+        },
+      );
+      steamLevel = levelResponse.data?.response?.player_level || 1;
+    } catch (levelErr) {
+      console.warn(
+        `[API] Could not fetch level for ${steamId}, defaulting to 1`,
+      );
+    }
+
+    const newUser = await prisma.userProfile.create({
+      data: {
+        id: steamId,
+        displayName: displayName,
+        avatarUrl: avatarUrl,
+        communityVisibility: communityVisibility,
+        joinDate: new Date(),
+        level: steamLevel,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully!",
+      user: newUser,
+    });
+  } catch (error) {
+    if (error.code === "P2002") {
+      return res
+        .status(409)
+        .json({ error: "User already exists in database." });
+    }
+
+    console.error("[Manual Add Error] Failed to register user:", error.message);
+    return res.status(500).json({ error: "Failed to add manual Steam user" });
+  }
+});
 
 app.get("/api/profile/:steamid", async (req, res) => {
   const { steamid } = req.params;
@@ -95,7 +215,7 @@ app.get("/api/recent-games/:steamid", async (req, res) => {
       name: game.name,
       recent_hoursPlayed: Math.round((game.playtime_2weeks / 60) * 10) / 10,
       total_hoursPlayed: Math.round((game.playtime_forever / 60) * 10) / 10,
-      iconUrl: `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`,
+      icon_url: `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`,
     }));
 
     res.json({ games });
@@ -105,37 +225,17 @@ app.get("/api/recent-games/:steamid", async (req, res) => {
   }
 });
 
-app.get("/api/game-details/:name", (req, res) => {
+app.get("/api/game-details/:name", async (req, res) => {
   const gameName = req.params.name;
 
-  const pythonProcess = spawn("python", ["hours_completed.py", gameName]);
+  try {
+    const playtimes = await fetchGamePlaytimes(gameName);
 
-  let outputData = "";
-  let errorData = "";
-
-  pythonProcess.stdout.on("data", (data) => {
-    outputData += data.toString();
-  });
-
-  pythonProcess.stderr.on("data", (data) => {
-    errorData += data.toString();
-  });
-
-  pythonProcess.on("close", (code) => {
-    if (code !== 0) {
-      console.error(`Python script error: ${errorData}`);
-      return res.status(500).json({ error: "Python handler script failed" });
-    }
-
-    try {
-      const parsedDetails = JSON.parse(outputData);
-      return res.json(parsedDetails);
-    } catch (parseError) {
-      return res
-        .status(500)
-        .json({ error: "Failed to parse Python data output" });
-    }
-  });
+    return res.json(playtimes);
+  } catch (error) {
+    console.error(`Error fetching details for ${gameName}:`, error);
+    return res.status(500).json({ error: "Failed to fetch game playtimes" });
+  }
 });
 
 app.get("/api/game-achievements/:appid", async (req, res) => {
@@ -198,29 +298,13 @@ app.get("/api/game-achievements/:appid", async (req, res) => {
 app.get("/api/game-genres/:appid", async (req, res) => {
   const { appid } = req.params;
 
-  try {
-    const url = `https://store.steampowered.com/api/appdetails?appids=${appid}`;
-    const response = await axios.get(url);
+  const result = await fetchSteamStoreDetails(Number(appid));
 
-    if (response.data[appid] && response.data[appid].success) {
-      const gameData = response.data[appid].data;
-
-      const genres = gameData.genres
-        ? gameData.genres.map((g) => g.description)
-        : [];
-
-      return res.json({ success: true, genres });
-    } else {
-      return res
-        .status(404)
-        .json({ success: false, error: "Game details not found" });
-    }
-  } catch (error) {
-    console.error(
-      `Failed fetching storefront details for app ${appid}:`,
-      error.message,
-    );
-
+  if (result.success) {
+    // Keeps the exact output your frontend expects!
+    return res.json({ success: true, genres: result.genres });
+  } else {
+    // If it failed or was rate-limited, keep your original fallback behavior intact
     return res.json({
       success: false,
       genres: [],
@@ -229,4 +313,8 @@ app.get("/api/game-genres/:appid", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("Proxy running on port 3000"));
+app.listen(3000, () => {
+  console.log("Proxy running on port 3000");
+
+  initPlaytimeCron();
+});
