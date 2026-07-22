@@ -31,3 +31,5 @@ Python, Node.js, PostgreSQL, React, Steam Web API
 - [ ] Genre-weighting algorithm
 - [x] Dashboard charts
 - [ ] Recommendation engine
+- [ ] Integration Testing
+- [ ] Deployment
