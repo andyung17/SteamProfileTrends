@@ -10,6 +10,8 @@ import { spawn } from "child_process";
 import userRouter from "./src/routes/userRoutes.ts";
 import sessionRouter from "./src/routes/sessionRoutes.ts";
 import gameInfoRouter from "./src/routes/gameInformation.ts";
+import gameRouter from "./src/routes/gameRoutes.ts";
+import playTimeRouter from "./src/routes/playTimeCheck.ts";
 
 import { initPlaytimeCron } from "./src/services/cronService.ts";
 import { fetchSteamStoreDetails } from "./src/utils/steam.ts";
@@ -24,6 +26,8 @@ app.use(passport.initialize());
 app.use("/api/users", userRouter);
 app.use("/api", sessionRouter);
 app.use("/api", gameInfoRouter);
+app.use("/api", gameRouter);
+app.use("/api", playTimeRouter);
 
 passport.use(
   new SteamStrategy(

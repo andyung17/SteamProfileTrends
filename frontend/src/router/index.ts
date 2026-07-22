@@ -6,6 +6,7 @@ import Dashboard from "../components/Dashboard.vue";
 import GameInfo from "../components/GameInfo.vue";
 import Recommendation from "../components/Recommendation.vue";
 import EntireGamesList from "../components/EntireGamesList.vue";
+import Charts from "../components/Charts.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,6 +21,12 @@ const router = createRouter({
       name: "Dashboard",
       alias: "/dashboard",
       component: Dashboard,
+    },
+    {
+      path: "/charts/user/:steamId",
+      name: "Charts",
+      alias: "/charts",
+      component: Charts,
     },
     {
       path: "/homepage/user/:steamId",

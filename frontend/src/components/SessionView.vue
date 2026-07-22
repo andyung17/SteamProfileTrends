@@ -126,7 +126,13 @@ onMounted(async () => {
 
 <style scoped>
 
-.recent-games-container { max-width: 900px; margin: 40px auto; font-family: sans-serif; }
+.recent-games-container {
+  max-width: 900px;
+  margin: 40px auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 .section-title { font-size: 24px; color: #fff; margin-bottom: 4px; }
 .section-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.4); display: block; margin-bottom: 16px; }
 .games-list-box { background: rgba(10, 15, 26, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
