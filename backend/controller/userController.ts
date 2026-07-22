@@ -103,3 +103,33 @@ export const deleteUserProfile = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// get all users
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.userProfile.findMany({
+      select: {
+        id: true,
+        displayName: true,
+        avatarUrl: true,
+        level: true,
+        joinDate: true,
+        communityVisibility: true,
+      },
+      orderBy: {
+        joinDate: "desc",
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error: any) {
+    console.error("Failed to retrieve user profiles:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
+  }
+};
