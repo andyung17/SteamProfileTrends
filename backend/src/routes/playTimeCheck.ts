@@ -1,5 +1,3 @@
-// getThirtyDayPlaytimeChecksByUser
-
 import { Router } from "express";
 
 import { getPlaytimeChecksByUser } from "../../controller/playTimeCheckcontroller";

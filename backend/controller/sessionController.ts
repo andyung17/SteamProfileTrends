@@ -20,11 +20,15 @@ export const getSessionAmount = async (req: Request, res: Response) => {
         .json({ error: "Game Id is required to find amount of sessions" });
     }
 
+    const resolvedGameId = Array.isArray(gameId)
+      ? gameId[0]
+      : (gameId as string);
+
     const sessionCount = await prisma.session.count({
       where: {
-        userId: steamId,
+        userId: steamId as string,
         gameInstance: {
-          steamAppid: parseInt(gameId, 10),
+          steamAppid: parseInt(resolvedGameId, 10),
         },
       },
     });
@@ -60,7 +64,7 @@ export const getSessionHistory = async (req: Request, res: Response) => {
 
     const sessionHistory = await prisma.session.findMany({
       where: {
-        userId: steamId,
+        userId: steamId as string,
       },
       orderBy: {
         startAt: "desc",
@@ -122,7 +126,7 @@ export const getOneTypeSessionHistory = async (req: Request, res: Response) => {
 
     const sessionHistory = await prisma.session.findMany({
       where: {
-        userId: steamId,
+        userId: steamId as string,
         gameInstance: {
           steamAppid: parsedGameId,
         },
@@ -165,6 +169,66 @@ export const getOneTypeSessionHistory = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+export const getActiveSession = async (req: Request, res: Response) => {
+  try {
+    const { steamId } = req.params;
+
+    if (!steamId) {
+      return res.status(400).json({
+        success: false,
+        error: "Steam ID is required to query active session.",
+      });
+    }
+
+    const activeSession = await prisma.session.findFirst({
+      where: {
+        userId: steamId as string,
+        endAt: null,
+      },
+      include: {
+        gameInstance: {
+          select: {
+            steamAppid: true,
+            gameCatalog: {
+              select: {
+                name: true,
+                iconUrl: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        startAt: "desc",
+      },
+    });
+
+    if (!activeSession) {
+      return res.status(200).json({
+        success: true,
+        activeSession: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      activeSession: {
+        sessionId: activeSession.id,
+        gameId: activeSession.gameInstance.steamAppid,
+        gameName: activeSession.gameInstance.gameCatalog.name,
+        startAt: activeSession.startAt,
+        logoUrl: activeSession.gameInstance.gameCatalog.iconUrl,
+      },
+    });
+  } catch (error: any) {
+    console.error("Active session retrieval error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
   }
 };
 
