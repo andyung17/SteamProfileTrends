@@ -27,7 +27,7 @@ Python, Node.js, PostgreSQL, React, Steam Web API
 
 ## Roadmap
 - [x] Steam OAuth integration
-- [ ] Playtime polling service
+- [x] Playtime polling service
 - [ ] Genre-weighting algorithm
-- [ ] Dashboard charts
+- [x] Dashboard charts
 - [ ] Recommendation engine
